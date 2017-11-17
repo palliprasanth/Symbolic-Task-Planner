@@ -57,7 +57,6 @@ Graph::Graph(int* blocksV, int numofblocks, int* trianglesV, int numoftriangles,
 
 	RootNode.g_value = 0;
 	RootNode.h_value = 0;
-	RootNode.is_visited = false;
 
 	RootNode.clear_literals.sort();
 	RootNode.on_literals.sort();
@@ -170,10 +169,12 @@ bool Graph::are_nodes_equal(Node* node1, Node* node2){
 	return true;
 }
 
-bool Graph::is_Node_in_Graph(Node* Current_Node){
+bool Graph::is_Node_in_Graph(Node* Current_Node, Node* Original_Node){
 	for (list<Node>::iterator it = Vertices.begin(); it != Vertices.end(); it++){
-		if(are_nodes_equal(Current_Node, &(*it)))
+		if(are_nodes_equal(Current_Node, &(*it))){
+			Original_Node = &(*it);
 			return true;
+		}
 	}
 	return false;
 
@@ -264,6 +265,7 @@ void Graph::move_to(Node* Current_State, int x, int y, int z){
 	
 	New_node.g_value = Current_State->g_value + 1;
 	New_node.h_value = Get_Heuristic(&New_node);
+	//New_node.h_value = 0;
 	New_node.action_index = 0;
 	New_node.action_blocks[0] = x;
 	New_node.action_blocks[1] = y;
@@ -272,11 +274,20 @@ void Graph::move_to(Node* Current_State, int x, int y, int z){
 	New_node.clear_literals.sort();
 	New_node.on_literals.sort();
 
-	if (!is_Node_in_Graph(&New_node)){
+	Node* TempNode;
+
+	if (!is_Node_in_Graph(&New_node, TempNode)){
 		New_node.node_id = Vertices.size() + 1;
 	//Add the node to the graph
 		Vertices.push_back(New_node);
 		open_set.push(&Vertices.back());
+	}
+
+	else{
+		if (!TempNode->is_closed){
+			if(New_node.g_value < TempNode->g_value)
+				TempNode->g_value = New_node.g_value;
+		}
 	}
 }
 
@@ -334,6 +345,7 @@ void Graph::move_to_table(Node* Current_State, int x, int y){
 	New_node.on_literals.push_back(temp);
 	New_node.g_value = Current_State->g_value + 1;
 	New_node.h_value = Get_Heuristic(&New_node);
+	//New_node.h_value = 0;
 	New_node.action_index = 1;
 	New_node.action_blocks[0] = x;
 	New_node.action_blocks[1] = y;
@@ -342,12 +354,21 @@ void Graph::move_to_table(Node* Current_State, int x, int y){
 	New_node.clear_literals.sort();
 	New_node.on_literals.sort();
 
-	if (!is_Node_in_Graph(&New_node)){
+	Node* TempNode;
+
+	if (!is_Node_in_Graph(&New_node, TempNode)){
 		New_node.node_id = Vertices.size() + 1;
 	//Add the node to the graph
 		Vertices.push_back(New_node);
 		open_set.push(&Vertices.back());
+	} 
+	else{
+		if (!TempNode->is_closed){
+			if(New_node.g_value < TempNode->g_value)
+				TempNode->g_value = New_node.g_value;
+		}
 	}
+
 }
 
 void Graph::move_to_table_heuristic(Node* Current_State, int x, int y){
@@ -377,21 +398,9 @@ void Graph::move_to_table_heuristic(Node* Current_State, int x, int y){
 }
 
 void Graph::Get_Succesors(Node* Current_Node){
-	//mexPrintf("Getting Succesors\n");
-	// for (list<int>::iterator it1 = Current_Node->clear_literals.begin(); it1 != Current_Node->clear_literals.end(); it1++){
-	// 	int on_block = block_is_on(Current_Node, *it1);
-	// 	for (list<int>::iterator it2 = Current_Node->clear_literals.begin(); it2 != Current_Node->clear_literals.end(); it2++){
-	// 		if(*it1 != *it2){				
-	// 			//mexPrintf("%d Block is on %d \n",*it1 , on_block);
-	// 			move_to(Current_Node, *it1, on_block, *it2);
-	// 		}
-	// 	}
-	// 	if (on_block != TableInd)
-	// 		move_to_table(Current_Node, *it1, on_block);
-	// }
 	for(int i=0; i < TableInd; i++){
 		for(int j=0; j <= TableInd; j++){
-			for(int k=0; k <= TableInd; k++){
+			for(int k=0; k < TableInd; k++){
 				if(i != j){
 					if (i != k){
 						move_to(Current_Node, i, j, k);
@@ -408,30 +417,9 @@ void Graph::Get_Succesors(Node* Current_Node){
 }
 
 void Graph::Get_Succesors_heuristic(Node* Current_Node){
-	//mexPrintf("Getting Heuristic Succesors\n");
-	//mexPrintf("Getting Succesors for Node %d with g value : %d", Current_Node->node_id, Current_Node->g_value + Current_Node->h_value);
-	//print_Node_Info(Current_Node);
-
-	// for (list<int>::iterator it1 = Current_Node->clear_literals.begin(); it1 != Current_Node->clear_literals.end(); it1++){
-	// 		//mexPrintf("%d Block is on %d \n",*it1 , *it3);
-	// 	list<int> on_blocks = block_on_blocks(Current_Node, *it1);
-	// 	for (list<int>::iterator it2 = Current_Node->clear_literals.begin(); it2 != Current_Node->clear_literals.end(); it2++){
-	// 		if(*it1 != *it2){
-	// 			for (list<int>::iterator it3 = on_blocks.begin(); it3 != on_blocks.end(); it3++){
-	// 				move_to_heuristic(Current_Node, *it1, *it3, *it2);
-	// 			}
-	// 		}
-	// 	}
-
-	// 	for (list<int>::iterator it3 = on_blocks.begin(); it3 != on_blocks.end(); it3++){
-	// 		if (*it3!= TableInd)
-	// 			move_to_table_heuristic(Current_Node, *it1, *it3);
-	// 	}
-	// }
-
 	for(int i=0; i< (TableInd); i++){
 		for(int j=0; j <= TableInd; j++){
-			for(int k=0; k <= TableInd; k++){
+			for(int k=0; k < TableInd; k++){
 				if(i != j){
 					if (i != k){
 						move_to_heuristic(Current_Node, i, j, k);
@@ -456,23 +444,12 @@ int Graph::Get_Heuristic(Node* Current_Node){
 	// Dijkstra to find the heuristic values
 	while (!Heuristic_Graph.open_set.empty()){
 		Cur_Node = Heuristic_Graph.open_set.top();
-		//print_Node_Info(Cur_Node);
 		if (Heuristic_Graph.is_goal_in_node(Cur_Node, &GoalNode)){
-			//print_Node_Info(Cur_Node);
-			//mexPrintf("Number of expansions: %d\n", Heuristic_Graph.Vertices.size());
 			return Cur_Node->g_value;
 		}
 		//Cur_Node->is_closed = true;
 		Heuristic_Graph.open_set.pop();
 		Heuristic_Graph.Get_Succesors_heuristic(Cur_Node);
-
-		if (counter == 5000){
-			Heuristic_Graph.print_Graph_Info();
-		 	// print_Node_Info(Cur_Node);
-			break;
-		}
-
-		counter++;
 	}
 
 	return -1;

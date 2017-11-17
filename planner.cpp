@@ -94,6 +94,12 @@ static void planner(int* blocksV, int numofblocks, int* trianglesV, int numoftri
 		task_planner.open_set.pop();
 		task_planner.Get_Succesors(Cur_Node);
 
+
+		// if (counter == 0){
+		// 	task_planner.print_Graph_Info();
+		// 	return;
+		// }
+		// counter ++;
 	}
 
 	while(Graph_Goal->parent != NULL){

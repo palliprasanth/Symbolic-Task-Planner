@@ -24,10 +24,8 @@ struct Node{
 	Node* parent;
 	list<two_int> on_literals;
 	list<int> clear_literals;
-	list<Node*> children;
 	int g_value;
 	int h_value;
-	bool is_visited;
 	bool is_closed;
 	int action_blocks[3];
 };
@@ -64,7 +62,7 @@ public:
 
 	bool are_nodes_equal(Node*, Node*);
 	bool is_goal_in_node(Node*, Node*);
-	bool is_Node_in_Graph(Node*);
+	bool is_Node_in_Graph(Node*, Node*);
 
 	int block_is_on(Node*, int);
 	list<int> block_on_blocks(Node*, int);
