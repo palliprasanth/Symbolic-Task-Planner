@@ -1,0 +1,25 @@
+Approach: 
+
+I have implemented A-star search by generating successors on the fly from the start state. For the heuristic of a state, I have
+implemented the relaxed approach where the actions induce positive effects alone. Since, this heuristic is admissible, 
+the path obtained from A-star will be optimal.
+
+While computing the heuristic, since we are not deleting the negative effects, the branching factor seemed to be very high. 
+To speed this up, I used the number of missing literals of the goal state in the current state for guiding the heuristic search.
+
+Termination criteria is set to "goal found" or "empty open set", thus ensuring completeness. 
+Since, I am using an admissible heuristic, the planner is optimal. 
+
+Compilation:
+mex -v CXXFLAGS="$CXXFLAGS -std=c++11" -largeArrayDims planner.cpp plannerheader.cpp
+
+RunTimes on my System:
+Without any Heuristic:
+Test1: 0.000163sec
+Test2: 0.112269sec
+
+Without the admissible Heuristic:
+Test1: 0.000506sec
+Test2: 4.578083sec
+
+Ironically, computing heuristics is slowing things down.
